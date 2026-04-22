@@ -1,0 +1,86 @@
+[
+  {
+    "username": "alice",
+    "password": "password123",
+    "handle": "alice_wonder",
+    "display_name": "Alice Wonderland",
+    "emoji": "🦋"
+  },
+  {
+    "username": "bob",
+    "password": "password123",
+    "handle": "bob_builder",
+    "display_name": "Bob the Builder",
+    "emoji": "🔨"
+  },
+  {
+    "username": "charlie",
+    "password": "password123",
+    "handle": "charlie_choco",
+    "display_name": "Charlie Chocolate",
+    "emoji": "🍫"
+  },
+  {
+    "username": "diana",
+    "password": "password123",
+    "handle": "diana_moon",
+    "display_name": "Diana Moon",
+    "emoji": "🌙"
+  },
+  {
+    "username": "ethan",
+    "password": "password123",
+    "handle": "ethan_eagle",
+    "display_name": "Ethan Eagle",
+    "emoji": "🦅"
+  },
+  {
+    "username": "fiona",
+    "password": "password123",
+    "handle": "fiona_fox",
+    "display_name": "Fiona Fox",
+    "emoji": "🦊"
+  },
+  {
+    "username": "george",
+    "password": "password123",
+    "handle": "george_galaxy",
+    "display_name": "George Galaxy",
+    "emoji": "🌌"
+  },
+  {
+    "username": "hannah",
+    "password": "password123",
+    "handle": "hannah_heart",
+    "display_name": "Hannah Heart",
+    "emoji": "💖"
+  },
+  {
+    "username": "ivan",
+    "password": "password123",
+    "handle": "ivan_ice",
+    "display_name": "Ivan Ice",
+    "emoji": "❄️"
+  },
+  {
+    "username": "julia",
+    "password": "password123",
+    "handle": "julia_jazz",
+    "display_name": "Julia Jazz",
+    "emoji": "🎷"
+  },
+  {
+    "username": "kevin",
+    "password": "password123",
+    "handle": "kevin_knight",
+    "display_name": "Kevin Knight",
+    "emoji": "⚔️"
+  },
+  {
+    "username": "luna",
+    "password": "password123",
+    "handle": "luna_light",
+    "display_name": "Luna Light",
+    "emoji": "✨"
+  }
+]
