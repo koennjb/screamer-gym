@@ -1,0 +1,631 @@
+openapi: 3.0.0
+info:
+  title: Screamer API
+  version: 1.0.0
+  description: API documentation for Screamer - a Twitter-like social media platform
+  contact:
+    name: Screamer API Support
+    email: support@screamer.app
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: /
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication endpoints
+  - name: Users
+    description: User profile and management
+  - name: Posts
+    description: Post/Scream management
+  - name: Social
+    description: Social interactions (likes, comments, follows)
+  - name: Feed
+    description: Timeline and feed endpoints
+  - name: Admin
+    description: Admin endpoints (INTENTIONALLY UNPROTECTED)
+
+paths:
+  /api/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  minLength: 6
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Invalid input or username taken
+
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+        '401':
+          description: Invalid credentials
+
+  /api/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: User logout
+      responses:
+        '200':
+          description: Logout successful
+
+  /api/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user profile
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current user profile
+        '401':
+          description: Unauthorized
+
+  /api/users/profile:
+    put:
+      tags: [Users]
+      summary: Update user profile
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name:
+                  type: string
+                emoji:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated
+        '401':
+          description: Unauthorized
+
+  /api/users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User profile
+        '404':
+          description: User not found
+
+  /api/users/{id}/stats:
+    get:
+      tags: [Users]
+      summary: Get user statistics
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User statistics
+
+  /api/users/{id}/followers:
+    get:
+      tags: [Users]
+      summary: Get user's followers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of followers
+
+  /api/users/{id}/following:
+    get:
+      tags: [Users]
+      summary: Get users followed by user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of following
+
+  /api/users/{id}/follow:
+    post:
+      tags: [Social]
+      summary: Follow a user
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully followed
+        '401':
+          description: Unauthorized
+    delete:
+      tags: [Social]
+      summary: Unfollow a user
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully unfollowed
+        '401':
+          description: Unauthorized
+
+  /api/users/{id}/follow-status:
+    get:
+      tags: [Social]
+      summary: Check if current user follows target user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Follow status
+
+  /api/posts:
+    get:
+      tags: [Posts]
+      summary: Get all posts with pagination
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of posts
+    post:
+      tags: [Posts]
+      summary: Create new post
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  maxLength: 280
+      responses:
+        '201':
+          description: Post created
+        '401':
+          description: Unauthorized
+
+  /api/posts/{id}:
+    get:
+      tags: [Posts]
+      summary: Get specific post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Post details
+        '404':
+          description: Post not found
+    put:
+      tags: [Posts]
+      summary: Update post
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  maxLength: 280
+      responses:
+        '200':
+          description: Post updated
+        '401':
+          description: Unauthorized
+        '403':
+          description: Cannot edit others posts
+    delete:
+      tags: [Posts]
+      summary: Delete post
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Post deleted
+        '401':
+          description: Unauthorized
+        '403':
+          description: Cannot delete others posts
+
+  /api/posts/user/{userId}:
+    get:
+      tags: [Posts]
+      summary: Get posts by specific user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User's posts
+
+  /api/posts/following:
+    get:
+      tags: [Posts]
+      summary: Get posts from followed users
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Posts from following
+        '401':
+          description: Unauthorized
+
+  /api/posts/{id}/like:
+    post:
+      tags: [Social]
+      summary: Like a post
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Post liked
+        '401':
+          description: Unauthorized
+    delete:
+      tags: [Social]
+      summary: Unlike a post
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Post unliked
+        '401':
+          description: Unauthorized
+
+  /api/posts/{id}/likes:
+    get:
+      tags: [Social]
+      summary: Get likes for a post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of likes
+
+  /api/posts/{id}/comments:
+    get:
+      tags: [Social]
+      summary: Get comments for a post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of comments
+    post:
+      tags: [Social]
+      summary: Add comment to post
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  maxLength: 280
+      responses:
+        '201':
+          description: Comment created
+        '401':
+          description: Unauthorized
+
+  /api/comments/{id}:
+    delete:
+      tags: [Social]
+      summary: Delete comment
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Comment deleted
+        '401':
+          description: Unauthorized
+        '403':
+          description: Cannot delete others comments
+
+  /api/feed/global:
+    get:
+      tags: [Feed]
+      summary: Get global timeline
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Global feed
+
+  /api/feed/following:
+    get:
+      tags: [Feed]
+      summary: Get personalized feed
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Following feed
+        '401':
+          description: Unauthorized
+
+  /api/feed/trending:
+    get:
+      tags: [Feed]
+      summary: Get trending posts
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Trending posts
+
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+
+  /api/stats/global:
+    get:
+      tags: [Stats]
+      summary: Get global platform statistics
+      responses:
+        '200':
+          description: Global statistics
+
+  /api/admin/stats:
+    get:
+      tags: [Admin]
+      summary: Get admin dashboard statistics (UNPROTECTED - Vulnerability)
+      description: Intentionally unprotected endpoint exposing admin statistics
+      responses:
+        '200':
+          description: Admin statistics including user counts, activity logs
+        '500':
+          description: Internal server error
+
+  /api/admin/activity:
+    get:
+      tags: [Admin]
+      summary: Get activity log (UNPROTECTED - Vulnerability)
+      description: Intentionally unprotected endpoint exposing all user activity
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Activity log entries with pagination
+        '500':
+          description: Internal server error
+
+  /api/admin/ban-user:
+    post:
+      tags: [Admin]
+      summary: Ban or unban a user (UNPROTECTED - Vulnerability)
+      description: Intentionally unprotected endpoint allowing anyone to ban users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [handle]
+              properties:
+                handle:
+                  type: string
+                  description: User handle to ban/unban
+                banned:
+                  type: boolean
+                  description: True to ban, false to unban
+      responses:
+        '200':
+          description: User ban status updated
+        '400':
+          description: Invalid input
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+  /api/admin/delete-post:
+    delete:
+      tags: [Admin]
+      summary: Delete any post (UNPROTECTED - Vulnerability)
+      description: Intentionally unprotected endpoint allowing anyone to delete posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [postId]
+              properties:
+                postId:
+                  type: integer
+                  description: ID of the post to delete
+      responses:
+        '200':
+          description: Post deleted successfully
+        '400':
+          description: Invalid input
+        '404':
+          description: Post not found
+        '500':
+          description: Internal server error
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: auth_token
+    basicAuth:
+      type: http
+      scheme: basic
