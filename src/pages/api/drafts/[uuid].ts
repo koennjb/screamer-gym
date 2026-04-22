@@ -7,10 +7,16 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const { uuid } = req.query;
 
   if (req.method === 'GET') {
-    // INTENTIONALLY VULNERABLE: No IDOR protection - anyone can view any draft
+    // Security: Require authentication and verify draft ownership before returning content.
+    // Drafts are private, unpublished content — only the author may read them.
+    const user = getUserFromRequest(req);
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     try {
       const draft = db.prepare(`
-        SELECT 
+        SELECT
           d.id, d.uuid, d.content, d.created_at, d.updated_at,
           a.id as author_id, a.username, a.handle, a.display_name, a.emoji
         FROM drafts d
@@ -20,6 +26,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
       if (!draft) {
         return res.status(404).json({ error: 'Draft not found' });
+      }
+
+      // Enforce ownership: only the draft author can read their own drafts
+      if (draft.author_id !== user.id) {
+        return res.status(403).json({ error: 'Cannot view others drafts' });
       }
 
       return res.status(200).json(draft);
