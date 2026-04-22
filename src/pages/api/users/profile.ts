@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import db from '../../../lib/db';
-import { getUserFromRequest } from '../../../lib/auth';
+import { getUserFromRequest, isUserBanned } from '../../../lib/auth';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'PUT') {
@@ -11,6 +11,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
+
+  // Security: enforce ban server-side to prevent bypass via direct API calls
+  if (isUserBanned(user, res)) return;
 
   try {
     const { display_name, emoji } = req.body;
